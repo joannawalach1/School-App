@@ -12,6 +12,7 @@ import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,26 +23,23 @@ public class ExamService {
 
     private final ExamRepo examRepo;
     private final ExamMapper examMapper;
-    private StudentRepo studentRepo;
-    private SubjectRepo subjectRepo;
+    private final StudentRepo studentRepo;
+    private final SubjectRepo subjectRepo;
+@Transactional
+    public ExamDto save(ExamDto examDto) throws Exception {
+            Exam exam = examMapper.toEntity(examDto);
 
-    public ExamDto save(ExamDto examDto) throws ExamWithSuchNameExistsException {
-        if (examRepo.findByNameOfExam(examDto.getNameOfExam())) {
-            throw new ExamWithSuchNameExistsException("Exam with name " + examDto.getNameOfExam() + " already exists.");
+            Student student = studentRepo.findById(examDto.getStudentId())
+                    .orElseThrow(() -> new ExamWithSuchNameExistsException("Student not found with ID: " + examDto.getStudentId()));
+            Subject subject = subjectRepo.findById(examDto.getSubjectId())
+                    .orElseThrow(() -> new ExamWithSuchNameExistsException("Subject not found with ID: " + examDto.getSubjectId()));
+
+            exam.setStudent(student);
+            exam.setSubject(subject);
+            exam = examRepo.save(exam);
+            return examMapper.toDto(exam);
         }
 
-        Exam exam = examMapper.toEntity(examDto);
-
-        Student student = studentRepo.findById(examDto.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + examDto.getStudentId()));
-        Subject subject = subjectRepo.findById(examDto.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found with ID: " + examDto.getSubjectId()));
-
-        exam.setStudent(student);
-        exam.setSubject(subject);
-        exam = examRepo.save(exam);
-        return examMapper.toDto(exam);
-    }
 
     public ExamDto findById(Long id) {
         Exam foundExam = examRepo.findById(id).orElseThrow(

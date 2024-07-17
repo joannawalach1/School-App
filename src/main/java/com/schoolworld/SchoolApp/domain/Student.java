@@ -24,7 +24,10 @@ public class Student {
     private String email;
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Exam> exams = new ArrayList<>();
-
+    @CreationTimestamp
+    private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime updated;
     public Student(Long studentId) {
     }
 }

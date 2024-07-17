@@ -26,8 +26,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-
-
 class ExamServiceTest {
 
     @Mock
@@ -104,24 +102,25 @@ class ExamServiceTest {
     }
 
     @Test
-    void shouldSaveExam() throws ExamWithSuchNameExistsException {
-        when(examRepo.findByNameOfExam(anyString())).thenReturn(false);
-        when(studentRepo.findById(anyLong())).thenReturn(Optional.of(student));
-        when(subjectRepo.findById(anyLong())).thenReturn(Optional.of(subject));
-        when(examMapper.toEntity(any(ExamDto.class))).thenReturn(exam);
-        when(examRepo.save(any(Exam.class))).thenReturn(exam);
-        when(examMapper.toDto(any(Exam.class))).thenReturn(examDto);
+    void shouldSaveExamSuccessfully() throws Exception {
+        // given
+        when(examMapper.toEntity(examDto)).thenReturn(exam);
+        when(studentRepo.findById(examDto.getStudentId())).thenReturn(Optional.of(student));
+        when(subjectRepo.findById(examDto.getSubjectId())).thenReturn(Optional.of(subject));
+        when(examRepo.save(exam)).thenReturn(exam);
+        when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
 
-        ExamDto result = examService.save(examDto);
+        // when
+        ExamDto savedExamDto = examService.save(examDto);
 
-        assertNotNull(result);
-        assertEquals(examDto.getNameOfExam(), result.getNameOfExam());
-
-        verify(examRepo, times(1)).findByNameOfExam(anyString());
-        verify(studentRepo, times(1)).findById(anyLong());
-        verify(subjectRepo, times(1)).findById(anyLong());
-        verify(examRepo, times(1)).save(any(Exam.class));
-        verify(examMapper, times(1)).toDto(any(Exam.class));
+        // then
+        assertNotNull(savedExamDto);
+        assertEquals(expectedExamDto.getNameOfExam(), savedExamDto.getNameOfExam());
+        verify(examMapper, times(1)).toEntity(examDto);
+        verify(studentRepo, times(1)).findById(examDto.getStudentId());
+        verify(subjectRepo, times(1)).findById(examDto.getSubjectId());
+        verify(examRepo, times(1)).save(exam);
+        verify(examMapper, times(1)).toDto(exam);
     }
 
     @Test
