@@ -1,9 +1,13 @@
 package com.schoolworld.SchoolApp.controllers;
 
+import com.schoolworld.SchoolApp.domain.Exam;
+import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
 import com.schoolworld.SchoolApp.exceptions.ExamNotFoundException;
-import com.schoolworld.SchoolApp.exceptions.ExamWithSuchNameExistsException;
+import com.schoolworld.SchoolApp.mappers.ExamMapper;
+import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import com.schoolworld.SchoolApp.service.ExamService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +18,11 @@ import java.util.Optional;
 @RequestMapping("/exam")
 public class ExamController {
     private final ExamService examService;
+    private final SubjectRepo subjectRepo;
 
-    public ExamController(ExamService ExamService) {
+    public ExamController(ExamService ExamService, SubjectRepo subjectRepo) {
         this.examService = ExamService;
+        this.subjectRepo = subjectRepo;
     }
 
     @PostMapping

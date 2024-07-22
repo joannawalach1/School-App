@@ -14,4 +14,5 @@ public class ExamDto {
     private LocalDateTime dateOfExam;
     private Long subjectId;
     private Long studentId;
+
 }

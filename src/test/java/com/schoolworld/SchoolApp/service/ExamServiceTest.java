@@ -1,59 +1,57 @@
 package com.schoolworld.SchoolApp.service;
 
-
 import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
-import com.schoolworld.SchoolApp.domain.dto.StudentDto;
-import com.schoolworld.SchoolApp.domain.dto.SubjectDto;
-import com.schoolworld.SchoolApp.exceptions.ExamNotFoundException;
-import com.schoolworld.SchoolApp.exceptions.ExamWithSuchNameExistsException;
 import com.schoolworld.SchoolApp.mappers.ExamMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class ExamServiceTest {
 
     @Mock
     private ExamRepo examRepo;
+
     @Mock
     private StudentRepo studentRepo;
-    @Mock
-    private ExamMapper examMapper;
+
     @Mock
     private SubjectRepo subjectRepo;
+
+    @Mock
+    private ExamMapper examMapper;
+
     @InjectMocks
     private ExamService examService;
+
     private ExamDto examDto;
     private Exam exam;
     private ExamDto expectedExamDto;
-    private List<Exam> exams;
-    private Exam updatedExam;
-
-    private SubjectDto subjectDto;
-    private StudentDto studentDto;
     private Student student;
     private Subject subject;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        // given
         examDto = new ExamDto();
         examDto.setNameOfExam("A1");
         examDto.setDateOfExam(LocalDateTime.of(2024, 5, 24, 3, 10));
@@ -64,49 +62,29 @@ class ExamServiceTest {
         exam.setId(1L);
         exam.setNameOfExam(examDto.getNameOfExam());
         exam.setDateOfExam(examDto.getDateOfExam());
-        exam.setStudent(new Student(examDto.getStudentId()));
-        exam.setSubject(new Subject(examDto.getSubjectId()));
 
-        studentDto = new StudentDto();
-        studentDto.setName("Wojtek");
-        studentDto.setEmail("wojtek12@op.pl");
+        subject = new Subject();
+        subject.setId(1L); // Poprawiono ID, aby pasowało do testów
+        subject.setName("Math");
 
         student = new Student();
         student.setId(1L);
-        student.setName(studentDto.getName());
-        student.setEmail(studentDto.getEmail());
-
-
-        subjectDto = new SubjectDto();
-        subjectDto.setName("Math");
-
-        subject = new Subject();
-        subject.setId(1L);
-        subject.setName(subjectDto.getName());
-
-
-        updatedExam = new Exam();
-        updatedExam.setId(1L);
-        updatedExam.setNameOfExam(examDto.getNameOfExam());
-        updatedExam.setDateOfExam(examDto.getDateOfExam());
-        updatedExam.setStudent(new Student(examDto.getStudentId()));
-        updatedExam.setSubject(new Subject(examDto.getSubjectId()));
+        student.setName("Wojtek");
+        student.setEmail("wojtek12@op.pl");
 
         expectedExamDto = new ExamDto();
         expectedExamDto.setNameOfExam(exam.getNameOfExam());
         expectedExamDto.setDateOfExam(exam.getDateOfExam());
         expectedExamDto.setStudentId(examDto.getStudentId());
         expectedExamDto.setSubjectId(examDto.getSubjectId());
-
-        exams = List.of(exam);
     }
 
     @Test
     void shouldSaveExamSuccessfully() throws Exception {
         // given
         when(examMapper.toEntity(examDto)).thenReturn(exam);
-        when(studentRepo.findById(examDto.getStudentId())).thenReturn(Optional.of(student));
         when(subjectRepo.findById(examDto.getSubjectId())).thenReturn(Optional.of(subject));
+        when(studentRepo.findById(examDto.getStudentId())).thenReturn(Optional.of(student));
         when(examRepo.save(exam)).thenReturn(exam);
         when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
 
@@ -117,51 +95,61 @@ class ExamServiceTest {
         assertNotNull(savedExamDto);
         assertEquals(expectedExamDto.getNameOfExam(), savedExamDto.getNameOfExam());
         verify(examMapper, times(1)).toEntity(examDto);
-        verify(studentRepo, times(1)).findById(examDto.getStudentId());
         verify(subjectRepo, times(1)).findById(examDto.getSubjectId());
+        verify(studentRepo, times(1)).findById(examDto.getStudentId());
         verify(examRepo, times(1)).save(exam);
         verify(examMapper, times(1)).toDto(exam);
     }
 
     @Test
-    void shouldFindExamById() throws ExamNotFoundException {
+    void shouldFindExamById() {
         // given
-        when(examRepo.findById(any())).thenReturn(Optional.of(exam));
-        when(examMapper.toDto(exam)).thenReturn(examDto);
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.of(exam));
+        when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
 
         // when
-        Optional<ExamDto> examFoundById = Optional.ofNullable(examService.findById(exam.getId()));
+        ExamDto foundExamDto = examService.findById(exam.getId());
 
         // then
-        assertTrue(examFoundById.isPresent());
-        assertEquals(examDto.getNameOfExam(), examFoundById.get().getNameOfExam());
+        assertNotNull(foundExamDto);
+        assertEquals(expectedExamDto.getNameOfExam(), foundExamDto.getNameOfExam());
         verify(examRepo, times(1)).findById(exam.getId());
         verify(examMapper, times(1)).toDto(exam);
     }
 
     @Test
-    void updateExamWithGivenId() throws ExamNotFoundException {
+    void shouldThrowExceptionWhenExamNotFoundById() {
         // given
-        when(examRepo.findById(exam.getId())).thenReturn(Optional.of(updatedExam));
-        when(examRepo.save(exam)).thenReturn(updatedExam);
-        when(examMapper.toDto(updatedExam)).thenReturn(expectedExamDto);
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.empty());
 
-        // when
-        Optional<ExamDto> updatedExamDto = Optional.ofNullable(examService.updateExam(exam.getId(), examDto));
-
-        // then
-        assertTrue(updatedExamDto.isPresent());
-        assertEquals(expectedExamDto.getNameOfExam(), updatedExamDto.get().getNameOfExam());
+        // when & then
+        assertThrows(EntityNotFoundException.class, () -> examService.findById(exam.getId()));
         verify(examRepo, times(1)).findById(exam.getId());
-        verify(examRepo, times(1)).save(exam);
-        verify(examMapper, times(1)).toDto(updatedExam);
     }
 
     @Test
-    void shouldDeleteExamById() throws ExamNotFoundException {
+    void shouldFindAllExams() {
         // given
-        when(examRepo.findById(anyLong())).thenReturn(Optional.of(exam));
-        doNothing().when(examRepo).deleteById(anyLong());
+        when(examRepo.findAll()).thenReturn(List.of(exam));
+        when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
+
+        // when
+        List<ExamDto> examDtos = examService.findAllExams();
+
+        // then
+        assertNotNull(examDtos);
+        assertFalse(examDtos.isEmpty());
+        assertEquals(1, examDtos.size());
+        assertEquals(expectedExamDto.getNameOfExam(), examDtos.get(0).getNameOfExam());
+        verify(examRepo, times(1)).findAll();
+        verify(examMapper, times(1)).toDto(exam);
+    }
+
+    @Test
+    void shouldDeleteExamById() {
+        // given
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.of(exam));
+        doNothing().when(examRepo).deleteById(exam.getId());
 
         // when
         examService.deleteExam(exam.getId());
@@ -169,5 +157,44 @@ class ExamServiceTest {
         // then
         verify(examRepo, times(1)).findById(exam.getId());
         verify(examRepo, times(1)).deleteById(exam.getId());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteExamNotFound() {
+        // given
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(EntityNotFoundException.class, () -> examService.deleteExam(exam.getId()));
+        verify(examRepo, times(1)).findById(exam.getId());
+    }
+
+    @Test
+    void shouldUpdateExamSuccessfully() {
+        // given
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.of(exam));
+        when(examMapper.toEntity(examDto)).thenReturn(exam);
+        when(examRepo.save(exam)).thenReturn(exam);
+        when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
+
+        // when
+        ExamDto updatedExamDto = examService.updateExam(exam.getId(), examDto);
+
+        // then
+        assertNotNull(updatedExamDto);
+        assertEquals(expectedExamDto.getNameOfExam(), updatedExamDto.getNameOfExam());
+        verify(examRepo, times(1)).findById(exam.getId());
+        verify(examRepo, times(1)).save(exam);
+        verify(examMapper, times(1)).toDto(exam);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateExamNotFound() {
+        // given
+        when(examRepo.findById(exam.getId())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(EntityNotFoundException.class, () -> examService.updateExam(exam.getId(), examDto));
+        verify(examRepo, times(1)).findById(exam.getId());
     }
 }

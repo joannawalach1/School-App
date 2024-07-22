@@ -1,0 +1,21 @@
+INSERT INTO exam (name_of_exam, date_of_exam, student_id, subject_id, created, updated) VALUES
+('Egzamin Śródroczny z Matematyki', '2024-05-01 10:00:00', 1, 1, NOW(), NOW()),
+('Egzamin Końcowy z Fizyki', '2024-06-10 15:00:00', 2, 2, NOW(), NOW()),
+('Test z Chemii', '2024-07-15 12:00:00', 3, 3, NOW(), NOW()),
+('Egzamin Śródroczny z Biologii', '2024-05-15 10:00:00', 4, 4, NOW(), NOW()),
+('Egzamin Końcowy z Historii', '2024-06-20 14:00:00', 5, 5, NOW(), NOW()),
+('Kartkówka z Geografii', '2024-04-20 09:00:00', 6, 6, NOW(), NOW()),
+('Test z Informatyki', '2024-05-05 11:00:00', 7, 7, NOW(), NOW()),
+('Egzamin Śródroczny z Języka Polskiego', '2024-05-12 10:00:00', 8, 8, NOW(), NOW()),
+('Egzamin Końcowy z Języka Angielskiego', '2024-06-15 16:00:00', 9, 9, NOW(), NOW()),
+('Test z Wychowania Fizycznego', '2024-05-25 08:00:00', 10, 10, NOW(), NOW()),
+('Egzamin Śródroczny z Matematyki', '2024-05-01 10:00:00', 2, 1, NOW(), NOW()),
+('Egzamin Końcowy z Fizyki', '2024-06-10 15:00:00', 3, 2, NOW(), NOW()),
+('Test z Chemii', '2024-07-15 12:00:00', 4, 3, NOW(), NOW()),
+('Egzamin Śródroczny z Biologii', '2024-05-15 10:00:00', 5, 4, NOW(), NOW()),
+('Egzamin Końcowy z Historii', '2024-06-20 14:00:00', 6, 5, NOW(), NOW()),
+('Kartkówka z Geografii', '2024-04-20 09:00:00', 7, 6, NOW(), NOW()),
+('Test z Informatyki', '2024-05-05 11:00:00', 8, 7, NOW(), NOW()),
+('Egzamin Śródroczny z Języka Polskiego', '2024-05-12 10:00:00', 9, 8, NOW(), NOW()),
+('Egzamin Końcowy z Języka Angielskiego', '2024-06-15 16:00:00', 10, 9, NOW(), NOW())
+

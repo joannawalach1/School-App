@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 666666
+      POSTGRES_DB: school1
+    ports:
+      - "5432:5432"
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge

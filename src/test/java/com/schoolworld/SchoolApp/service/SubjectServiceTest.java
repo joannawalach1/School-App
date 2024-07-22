@@ -8,9 +8,11 @@ import com.schoolworld.SchoolApp.mappers.SubjectMapper;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
@@ -18,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class SubjectServiceTest {
 
     @Mock
@@ -35,17 +39,15 @@ class SubjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         subjectDto = new SubjectDto();
-        subjectDto.setName("Math");
+        subjectDto.setName("Pedagogika");
 
         subject = new Subject();
-        subject.setId(1L);
-        subject.setName(subjectDto.getName());
+        subject.setId(12L);
+        subject.setName("Pedagogika");
 
         expectedSubjectDto = new SubjectDto();
-        expectedSubjectDto.setName("Math");
+        expectedSubjectDto.setName("Pedagogika");
     }
 
     @Test
@@ -70,14 +72,14 @@ class SubjectServiceTest {
     void findById() throws SubjectNotFoundException {
         // given
         when(subjectRepo.findById(subject.getId())).thenReturn(Optional.of(subject));
-        when(subjectMapper.toDto(subject)).thenReturn(subjectDto);
+        when(subjectMapper.toDto(subject)).thenReturn(expectedSubjectDto);
 
         // when
         SubjectDto subjectFoundById = subjectService.findById(subject.getId());
 
         // then
         assertNotNull(subjectFoundById);
-        assertEquals(subjectDto.getName(), subjectFoundById.getName());
+        assertEquals(expectedSubjectDto.getName(), subjectFoundById.getName());
         verify(subjectRepo, times(1)).findById(subject.getId());
         verify(subjectMapper, times(1)).toDto(subject);
     }
@@ -86,6 +88,7 @@ class SubjectServiceTest {
     void update() throws SubjectNotFoundException {
         // given
         when(subjectRepo.findById(subject.getId())).thenReturn(Optional.of(subject));
+        when(subjectMapper.toEntity(subjectDto)).thenReturn(subject);
         when(subjectRepo.save(subject)).thenReturn(subject);
         when(subjectMapper.toDto(subject)).thenReturn(expectedSubjectDto);
 
@@ -97,6 +100,7 @@ class SubjectServiceTest {
         assertEquals(expectedSubjectDto.getName(), updatedSubjectDto.getName());
         verify(subjectRepo, times(1)).findById(subject.getId());
         verify(subjectRepo, times(1)).save(subject);
+        verify(subjectMapper, times(2)).toEntity(subjectDto);
         verify(subjectMapper, times(1)).toDto(subject);
     }
 

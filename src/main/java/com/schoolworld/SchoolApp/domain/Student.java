@@ -22,12 +22,16 @@ public class Student {
     private Long id;
     private String name;
     private String email;
-    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "student", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Exam> exams = new ArrayList<>();
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
     public Student(Long studentId) {
+    }
+
+    public Student(String name, String email
+    ) {
     }
 }

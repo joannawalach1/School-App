@@ -2,6 +2,7 @@ package com.schoolworld.SchoolApp.service;
 
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.SubjectDto;
+import com.schoolworld.SchoolApp.exceptions.SubjectWithSuchNameExistsException;
 import com.schoolworld.SchoolApp.mappers.SubjectMapper;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,9 +19,14 @@ public class SubjectService {
     private final SubjectRepo subjectRepo;
     private final SubjectMapper subjectMapper;
 
-    public SubjectDto saveSubject(SubjectDto subjectDto) {
+    public SubjectDto saveSubject(SubjectDto subjectDto) throws SubjectWithSuchNameExistsException {
+        if (subjectRepo.findByName(subjectDto.getName()).isPresent()) {
+            throw new SubjectWithSuchNameExistsException("Subject with such name already exists.");
+        }
+
         Subject subject = subjectMapper.toEntity(subjectDto);
         Subject savedSubject = subjectRepo.save(subject);
+
         return subjectMapper.toDto(savedSubject);
     }
 

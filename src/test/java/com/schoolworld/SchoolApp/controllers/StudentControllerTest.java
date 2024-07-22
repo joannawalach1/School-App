@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.dto.StudentDto;
+import com.schoolworld.SchoolApp.repository.StudentRepo;
+import com.schoolworld.SchoolApp.service.ExamService;
 import com.schoolworld.SchoolApp.service.StudentService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -44,12 +49,32 @@ class StudentControllerTest {
 
     private ObjectMapper objectMapper;
     private Student student;
+    @Autowired
+    private StudentRepo studentRepo;
+
+    @BeforeAll
+    public static void setUp() {
+        PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
+                .withDatabaseName("school1")
+                .withUsername("postgres")
+                .withPassword("666666");
+
+        postgres.start();
+        System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
+        System.setProperty("spring.datasource.username", postgres.getUsername());
+        System.setProperty("spring.datasource.password", postgres.getPassword());
+    }
 
     @BeforeEach
-    void setUp() {
+    void setUp1() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-    }
+            Student student1 = new Student("Jan", "jan@op.pl");
+            Student student2 = new Student("Anna", "anna@op.pl");
+
+            studentRepo.save(student1);
+            studentRepo.save(student2);
+        }
 
     @Test
     void getByEmail() throws Exception {

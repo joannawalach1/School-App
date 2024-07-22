@@ -20,11 +20,13 @@ public class Exam{
     private Long id;
     private String nameOfExam;
     private LocalDateTime dateOfExam;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Subject Subject;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
+
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp

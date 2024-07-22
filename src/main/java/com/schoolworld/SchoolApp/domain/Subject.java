@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -19,6 +21,8 @@ public class Subject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
+    private List<Exam> exams;
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp

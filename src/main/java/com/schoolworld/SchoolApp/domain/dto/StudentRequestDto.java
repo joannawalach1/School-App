@@ -9,11 +9,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentDto {
+public class StudentRequestDto
+{
     private String name;
     private String email;
-    public List<ExamDto> exams;
-
-    public StudentDto(String name, String email) {
-    }
 }

@@ -1,6 +1,7 @@
 package com.schoolworld.SchoolApp.controllers;
 
 import com.schoolworld.SchoolApp.domain.dto.StudentDto;
+import com.schoolworld.SchoolApp.domain.dto.StudentRequestDto;
 import com.schoolworld.SchoolApp.exceptions.StudentNotFoundException;
 import com.schoolworld.SchoolApp.exceptions.StudentWithSuchIdExists;
 import com.schoolworld.SchoolApp.service.StudentService;
@@ -23,8 +24,8 @@ public class StudentController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StudentDto> saveStudent(@RequestBody StudentDto studentDto) throws StudentWithSuchIdExists {
-        StudentDto createdStudent = studentService.save(studentDto);
+    public ResponseEntity<StudentDto> saveStudent(@RequestBody StudentRequestDto studentRequestDto) throws StudentWithSuchIdExists {
+        StudentDto createdStudent = studentService.save(studentRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
     }
 
@@ -45,7 +46,7 @@ public class StudentController {
 
     @GetMapping(value = "/students", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<StudentDto>> findAll() {
-        List<StudentDto> allStudents = studentService.findAll();
+        List<StudentDto> allStudents = studentService.getStudentsWithExams();
         return ResponseEntity.status(HttpStatus.OK).body(allStudents);
     }
 
