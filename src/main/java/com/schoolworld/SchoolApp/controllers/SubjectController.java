@@ -20,25 +20,25 @@ import java.util.Optional;
         }
 
         @PostMapping
-        public ResponseEntity<SubjectDto> saveSubject(@RequestBody SubjectDto subjectDto) throws SubjectNotFoundException, SubjectWithSuchNameExistsException {
+        public ResponseEntity<SubjectDto> saveSubject(@RequestBody SubjectDto subjectDto) throws SubjectWithSuchNameExistsException {
             SubjectDto createdSubject = subjectService.saveSubject(subjectDto);
             return ResponseEntity.status(HttpStatus.OK).body(createdSubject);
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<Optional<SubjectDto>> findById(@PathVariable Long id) throws SubjectNotFoundException {
+        public ResponseEntity<Optional<SubjectDto>> findById(@PathVariable Long id) {
             SubjectDto subjectDto = subjectService.findById(id);
             return  ResponseEntity.status(HttpStatus.OK).body(Optional.ofNullable(subjectDto));
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<Optional<SubjectDto>> updateSubject(@PathVariable Long id, @RequestBody SubjectDto subjectDto) throws SubjectNotFoundException {
+        public ResponseEntity<Optional<SubjectDto>> updateSubject(@PathVariable Long id, @RequestBody SubjectDto subjectDto) {
             Optional<SubjectDto> updatedSubject = Optional.ofNullable(subjectService.updateSubject(id, subjectDto));
             return ResponseEntity.status(HttpStatus.OK).body(updatedSubject);
         }
 
         @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteById(@PathVariable Long id) throws SubjectNotFoundException {
+        public ResponseEntity<Void> deleteById(@PathVariable Long id) {
             subjectService.deleteSubject(id);
             return ResponseEntity.noContent().build();
         }

@@ -4,7 +4,6 @@ import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
 import com.schoolworld.SchoolApp.domain.dto.StudentDto;
 import com.schoolworld.SchoolApp.domain.dto.StudentRequestDto;
-import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +14,6 @@ import java.util.stream.Collectors;
 public class StudentMapper {
     @Autowired
     private ExamMapper examMapper;
-    private SubjectRepo subjectRepo;
-
     public Student toEntity(StudentRequestDto studentRequestDto) {
         if (studentRequestDto == null) {
             return null;

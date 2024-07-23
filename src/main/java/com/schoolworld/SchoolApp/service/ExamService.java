@@ -4,6 +4,8 @@ import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
+import com.schoolworld.SchoolApp.exceptions.ExamWithSuchNameExistsException;
+import com.schoolworld.SchoolApp.exceptions.ExamsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.ExamMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
@@ -27,6 +29,10 @@ public class ExamService {
     private final SubjectRepo subjectRepo;
 @Transactional
     public ExamDto save(ExamDto examDto) throws Exception {
+   Optional<Exam> foundExam = examRepo.findByNameOfExam(examDto.getNameOfExam());
+   if (foundExam.isPresent()) {
+       throw new ExamWithSuchNameExistsException("Exam with such name: " + examDto.getNameOfExam() + "exists");
+   }
     Optional<Student> optionalStudent = examDto.getStudentId() != null ?
             studentRepo.findById(examDto.getStudentId()) :
             Optional.empty();
@@ -54,12 +60,15 @@ public class ExamService {
         return examMapper.toDto(foundExam);
     }
 
-    public List<ExamDto> findAllExams() {
+    public List<ExamDto> findAllExams() throws ExamsNotFoundException {
+        List<Exam> exams = examRepo.findAll();
+        if (exams.isEmpty()) {
+            throw new ExamsNotFoundException("No exams in database");
+        }
         return examRepo.findAll().stream()
                 .map(examMapper::toDto)
                 .collect(Collectors.toList());
     }
-    @jakarta.transaction.Transactional
     public void deleteExam(Long id) {
         Exam examToDelete = examRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));

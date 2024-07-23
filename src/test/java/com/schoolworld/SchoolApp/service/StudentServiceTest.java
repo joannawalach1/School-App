@@ -4,7 +4,9 @@ import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.dto.StudentDto;
 import com.schoolworld.SchoolApp.domain.dto.StudentRequestDto;
 import com.schoolworld.SchoolApp.exceptions.StudentNotFoundException;
+import com.schoolworld.SchoolApp.exceptions.StudentWithSuchEmailExists;
 import com.schoolworld.SchoolApp.exceptions.StudentWithSuchIdExists;
+import com.schoolworld.SchoolApp.exceptions.StudentsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.StudentMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
@@ -74,7 +76,7 @@ class StudentServiceTest {
     }
 
     @Test
-    public void shouldSaveNewStudentSuccessfully() throws StudentWithSuchIdExists {
+    public void shouldSaveNewStudentSuccessfully() throws StudentWithSuchIdExists, StudentWithSuchEmailExists {
         when(studentMapper.toEntity(studentRequestDto)).thenReturn(student);
         when(studentRepo.save(student)).thenReturn(student);
         when(studentMapper.toDto(student)).thenReturn(studentDto);
@@ -116,7 +118,7 @@ class StudentServiceTest {
     }
 
     @Test
-    void shouldFindAllStudents() {
+    void shouldFindAllStudents() throws StudentsNotFoundException {
         when(studentRepo.findAll()).thenReturn(students);
         when(studentMapper.toDto(student)).thenReturn(studentDto);
 
@@ -124,7 +126,7 @@ class StudentServiceTest {
 
         assertNotNull(allStudents);
         assertEquals(1, allStudents.size());
-        verify(studentRepo, times(1)).findAll();
+        verify(studentRepo, times(2)).findAll();
         verify(studentMapper, times(1)).toDto(student);
     }
 

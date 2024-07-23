@@ -27,7 +27,7 @@ class StudentControllerTest extends IntegrationTestConfig {
 
     @Autowired
     private StudentRepo studentRepo;
-@Autowired
+    @Autowired
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 

@@ -3,6 +3,7 @@ package com.schoolworld.SchoolApp.service;
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.SubjectDto;
 import com.schoolworld.SchoolApp.exceptions.SubjectWithSuchNameExistsException;
+import com.schoolworld.SchoolApp.exceptions.SubjectsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.SubjectMapper;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,7 +37,11 @@ public class SubjectService {
         return subjectMapper.toDto(foundSubject);
     }
 
-    public List<SubjectDto> findAllExams() {
+    public List<SubjectDto> findAllExams() throws SubjectsNotFoundException {
+        List<Subject> subjects = subjectRepo.findAll();
+        if (subjects.isEmpty()){
+            throw new SubjectsNotFoundException("No subjects in database");
+        }
         return subjectRepo.findAll().stream()
                 .map(subjectMapper::toDto)
                 .collect(Collectors.toList());

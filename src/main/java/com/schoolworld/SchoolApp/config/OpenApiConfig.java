@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
                 title = "School Management System API",
                 version = "1.0",
                 description = "API for managing school operations",
-                contact = @Contact(name = "Your Name", email = "your.email@example.com"),
+                contact = @Contact(name = "Jola Walach", email = "jola.walach@example.com"),
                 license = @License(name = "Apache 2.0", url = "http://springdoc.org")
         )
 )

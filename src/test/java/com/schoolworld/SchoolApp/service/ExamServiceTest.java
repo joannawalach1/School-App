@@ -4,6 +4,7 @@ import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
+import com.schoolworld.SchoolApp.exceptions.ExamsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.ExamMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
@@ -79,24 +80,6 @@ class ExamServiceTest {
     }
 
     @Test
-    void simpleMockTest() {
-        System.out.println("Starting simpleMockTest...");
-
-        // given
-        when(examMapper.toEntity(examDto)).thenReturn(exam);
-
-        // when
-        Exam examEntity = examMapper.toEntity(examDto);
-
-        // then
-        assertNotNull(examEntity);
-        assertEquals(exam.getNameOfExam(), examEntity.getNameOfExam());
-        examMapper.toEntity(examDto);
-
-        System.out.println("simpleMockTest completed.");
-    }
-
-    @Test
     void shouldSaveExamSuccessfully() throws Exception {
             // given
             when(examMapper.toEntity(examDto)).thenReturn(exam);
@@ -146,7 +129,7 @@ class ExamServiceTest {
     }
 
     @Test
-    void shouldFindAllExams() {
+    void shouldFindAllExams() throws ExamsNotFoundException {
         // given
         when(examRepo.findAll()).thenReturn(List.of(exam));
         when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
@@ -159,7 +142,7 @@ class ExamServiceTest {
         assertFalse(examDtos.isEmpty());
         assertEquals(1, examDtos.size());
         assertEquals(expectedExamDto.getNameOfExam(), examDtos.get(0).getNameOfExam());
-        verify(examRepo, times(1)).findAll();
+        verify(examRepo, times(2)).findAll();
         verify(examMapper, times(1)).toDto(exam);
     }
 

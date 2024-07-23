@@ -2,17 +2,10 @@ package com.schoolworld.SchoolApp.mappers;
 
 import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
-import com.schoolworld.SchoolApp.repository.ExamRepo;
-import com.schoolworld.SchoolApp.repository.StudentRepo;
-import com.schoolworld.SchoolApp.repository.SubjectRepo;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ExamMapper {
-    private ExamRepo examRepo;
-    private SubjectRepo subjectRepo;
-    private StudentRepo studentRepo;
 
     public Exam toEntity(ExamDto examDto) {
         Exam exam = new Exam();
