@@ -9,11 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class ExamMapper {
-    private final ExamRepo examRepo;
-    private final SubjectRepo subjectRepo;
-    private final StudentRepo studentRepo;
+    private ExamRepo examRepo;
+    private SubjectRepo subjectRepo;
+    private StudentRepo studentRepo;
 
     public Exam toEntity(ExamDto examDto) {
         Exam exam = new Exam();
@@ -23,7 +22,7 @@ public class ExamMapper {
     }
 
 
-    public static ExamDto toDto(Exam exam) {
+    public ExamDto toDto(Exam exam) {
         ExamDto examDto = new ExamDto();
         examDto.setNameOfExam(exam.getNameOfExam());
         examDto.setDateOfExam(exam.getDateOfExam());

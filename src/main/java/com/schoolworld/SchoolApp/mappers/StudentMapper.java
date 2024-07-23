@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 @Component
 public class StudentMapper {
     @Autowired
-    private static ExamMapper examMapper;
+    private ExamMapper examMapper;
     private SubjectRepo subjectRepo;
 
-    public static Student toEntity(StudentRequestDto studentRequestDto) {
+    public Student toEntity(StudentRequestDto studentRequestDto) {
         if (studentRequestDto == null) {
             return null;
         }
@@ -29,7 +29,7 @@ public class StudentMapper {
         return student;
     }
 
-    public static StudentDto toDto(Student student) {
+    public StudentDto toDto(Student student) {
         if (student == null) {
             return null;
         }
@@ -38,7 +38,7 @@ public class StudentMapper {
         studentDto.setName(student.getName());
         studentDto.setEmail(student.getEmail());
         List<ExamDto> examDtos = student.getExams().stream()
-                .map(ExamMapper::toDto)
+                .map(examMapper::toDto)
                 .collect(Collectors.toList());
         studentDto.setExams(examDtos);
         return studentDto;

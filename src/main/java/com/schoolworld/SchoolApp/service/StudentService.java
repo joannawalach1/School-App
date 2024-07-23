@@ -29,40 +29,29 @@ public class StudentService {
     private final ExamMapper examMapper;
 
     public StudentDto save(StudentRequestDto studentRequestDto) {
-            Student student = StudentMapper.toEntity(studentRequestDto);
+            Student student = studentMapper.toEntity(studentRequestDto);
             student.setName(studentRequestDto.getName());
             student.setEmail(studentRequestDto.getEmail());
             studentRepo.save(student);
-        return StudentMapper.toDto(student);
+        return studentMapper.toDto(student);
     }
 
     public Optional<StudentDto> findById(Long id) {
         Student foundStudent = studentRepo.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Student with id: " + id + " not found"));
-        return Optional.of(StudentMapper.toDto(foundStudent));
+        return Optional.of(studentMapper.toDto(foundStudent));
     }
 
     public Optional<StudentDto> findByEmail(String email) {
         Student foundStudent = studentRepo.findByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException("Student with email: " + email + " not found"));
-        StudentDto studentDto = new StudentDto(foundStudent.getName(), foundStudent.getEmail());
-        return Optional.of(StudentMapper.toDto(foundStudent));
+        return Optional.of(studentMapper.toDto(foundStudent));
     }
 
     public List<StudentDto> getStudentsWithExams() {
-        List<Student> students = studentRepo.findAll();
-        List<StudentDto> studentDtos = new ArrayList<>();
-
-        for (Student student : students) {
-            StudentDto studentDto = StudentMapper.toDto(student);
-            List<Exam> exams = examRepo.findByStudent(student);
-            List<ExamDto> examDtos = exams.stream()
-                    .map(ExamMapper::toDto)
-                    .collect(Collectors.toList());
-            studentDto.setExams(examDtos);
-            studentDtos.add(studentDto);
-        }
-        return studentDtos;
+        return studentRepo.findAll().stream()
+                .map(studentMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
@@ -80,6 +69,6 @@ public class StudentService {
         studentToUpdate.setEmail(studentDto.getEmail());
 
         Student savedStudent = studentRepo.save(studentToUpdate);
-        return StudentMapper.toDto(savedStudent);
+        return studentMapper.toDto(savedStudent);
     }
 }

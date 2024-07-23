@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ExamService {
 
     private final ExamRepo examRepo;
-    private static ExamMapper examMapper;
+    private final ExamMapper examMapper;
     private final StudentRepo studentRepo;
     private final SubjectRepo subjectRepo;
 @Transactional
@@ -56,7 +56,7 @@ public class ExamService {
 
     public List<ExamDto> findAllExams() {
         return examRepo.findAll().stream()
-                .map(ExamMapper::toDto)
+                .map(examMapper::toDto)
                 .collect(Collectors.toList());
     }
     @jakarta.transaction.Transactional

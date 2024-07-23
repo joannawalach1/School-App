@@ -44,17 +44,18 @@ public class SubjectService {
 
     public void deleteSubject(Long id) {
         Subject subjectToDelete = subjectRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Subject with id: " + id + " not found"));
         subjectRepo.deleteById(subjectToDelete.getId());
     }
 
     public SubjectDto updateSubject(Long id, SubjectDto subjectDto) {
-        Subject subjectToUpdate = subjectRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
+        Subject existingSubject = subjectRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Subject with id: " + id + " not found"));
 
-        subjectToUpdate.setName(subjectDto.getName());
+        Subject subjectToUpdate = subjectMapper.toEntity(subjectDto);
+        subjectToUpdate.setId(existingSubject.getId());
 
-        Subject savedSubject = subjectRepo.save(subjectToUpdate);
-        return subjectMapper.toDto(savedSubject);
+        Subject updatedSubject = subjectRepo.save(subjectToUpdate);
+        return subjectMapper.toDto(updatedSubject);
     }
 }

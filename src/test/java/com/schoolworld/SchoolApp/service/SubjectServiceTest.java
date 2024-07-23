@@ -86,23 +86,24 @@ class SubjectServiceTest {
 
     @Test
     void update() throws SubjectNotFoundException {
-        // given
-        when(subjectRepo.findById(subject.getId())).thenReturn(Optional.of(subject));
-        when(subjectMapper.toEntity(subjectDto)).thenReturn(subject);
-        when(subjectRepo.save(subject)).thenReturn(subject);
-        when(subjectMapper.toDto(subject)).thenReturn(expectedSubjectDto);
+            // given
+            when(subjectRepo.findById(subject.getId())).thenReturn(Optional.of(subject));
+            when(subjectMapper.toEntity(subjectDto)).thenReturn(subject);
+            when(subjectRepo.save(subject)).thenReturn(subject);
+            when(subjectMapper.toDto(subject)).thenReturn(expectedSubjectDto);
 
-        // when
-        SubjectDto updatedSubjectDto = subjectService.updateSubject(subject.getId(), subjectDto);
+            // when
+            SubjectDto updatedSubjectDto = subjectService.updateSubject(subject.getId(), subjectDto);
 
-        // then
-        assertNotNull(updatedSubjectDto);
-        assertEquals(expectedSubjectDto.getName(), updatedSubjectDto.getName());
-        verify(subjectRepo, times(1)).findById(subject.getId());
-        verify(subjectRepo, times(1)).save(subject);
-        verify(subjectMapper, times(2)).toEntity(subjectDto);
-        verify(subjectMapper, times(1)).toDto(subject);
-    }
+            // then
+            assertNotNull(updatedSubjectDto);
+            assertEquals(expectedSubjectDto.getName(), updatedSubjectDto.getName());
+            verify(subjectRepo, times(1)).findById(subject.getId());
+            verify(subjectRepo, times(1)).save(subject);
+            verify(subjectMapper, times(1)).toEntity(subjectDto);
+            verify(subjectMapper, times(1)).toDto(subject);
+        }
+
 
     @Test
     void deleteById() throws SubjectNotFoundException {

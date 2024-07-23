@@ -8,7 +8,6 @@ import com.schoolworld.SchoolApp.exceptions.StudentWithSuchIdExists;
 import com.schoolworld.SchoolApp.mappers.StudentMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +29,10 @@ class StudentServiceTest {
 
     @Mock
     private StudentRepo studentRepo;
+
     @Mock
     private ExamRepo examRepo;
+
     @Mock
     private StudentMapper studentMapper;
 
@@ -46,21 +46,8 @@ class StudentServiceTest {
     private Student updatedStudent;
     private StudentRequestDto studentRequestDto;
 
-    @BeforeAll
-    public static void setUp() {
-        PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
-                .withDatabaseName("school1")
-                .withUsername("postgres")
-                .withPassword("666666");
-
-        postgres.start();
-        System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
-        System.setProperty("spring.datasource.username", postgres.getUsername());
-        System.setProperty("spring.datasource.password", postgres.getPassword());
-    }
-
     @BeforeEach
-    public void setUp1() {
+    public void setUp() {
         studentRequestDto = new StudentRequestDto();
         studentRequestDto.setName("Adrian");
         studentRequestDto.setEmail("adrian@op.pl");
@@ -88,66 +75,78 @@ class StudentServiceTest {
 
     @Test
     public void shouldSaveNewStudentSuccessfully() throws StudentWithSuchIdExists {
-        when(studentRepo.save(any(Student.class))).thenReturn(student);
+        when(studentMapper.toEntity(studentRequestDto)).thenReturn(student);
+        when(studentRepo.save(student)).thenReturn(student);
+        when(studentMapper.toDto(student)).thenReturn(studentDto);
 
         StudentDto savedStudentDto = studentService.save(studentRequestDto);
 
         assertNotNull(savedStudentDto);
         assertEquals(studentDto.getEmail(), savedStudentDto.getEmail());
         assertEquals(studentDto.getName(), savedStudentDto.getName());
-        verify(studentRepo, times(1)).save(any(Student.class));
+        verify(studentMapper, times(1)).toEntity(studentRequestDto);
+        verify(studentRepo, times(1)).save(student);
+        verify(studentMapper, times(1)).toDto(student);
     }
 
     @Test
     void shouldFindStudentById() throws StudentNotFoundException {
-        when(studentRepo.findById(any(Long.class))).thenReturn(Optional.of(student));
+        when(studentRepo.findById(student.getId())).thenReturn(Optional.of(student));
+        when(studentMapper.toDto(student)).thenReturn(studentDto);
 
         Optional<StudentDto> studentFoundById = studentService.findById(student.getId());
 
         assertTrue(studentFoundById.isPresent());
         assertEquals(studentDto.getName(), studentFoundById.get().getName());
         verify(studentRepo, times(1)).findById(student.getId());
+        verify(studentMapper, times(1)).toDto(student);
     }
 
     @Test
     void shouldFindStudentByEmail() throws StudentNotFoundException {
-        when(studentRepo.findByEmail(any(String.class))).thenReturn(Optional.of(student));
+        when(studentRepo.findByEmail(student.getEmail())).thenReturn(Optional.of(student));
+        when(studentMapper.toDto(student)).thenReturn(studentDto);
 
         Optional<StudentDto> studentFoundByEmail = studentService.findByEmail(student.getEmail());
 
         assertTrue(studentFoundByEmail.isPresent());
         assertEquals(studentDto.getEmail(), studentFoundByEmail.get().getEmail());
         verify(studentRepo, times(1)).findByEmail(student.getEmail());
+        verify(studentMapper, times(1)).toDto(student);
     }
-//TODO test nie przechodzi examRepo null
+
     @Test
     void shouldFindAllStudents() {
         when(studentRepo.findAll()).thenReturn(students);
+        when(studentMapper.toDto(student)).thenReturn(studentDto);
 
         List<StudentDto> allStudents = studentService.getStudentsWithExams();
 
         assertNotNull(allStudents);
         assertEquals(1, allStudents.size());
         verify(studentRepo, times(1)).findAll();
+        verify(studentMapper, times(1)).toDto(student);
     }
 
     @Test
     void shouldUpdateStudentWithGivenId() throws StudentNotFoundException {
-        when(studentRepo.findById(any(Long.class))).thenReturn(Optional.of(updatedStudent));
-        when(studentRepo.save(any(Student.class))).thenReturn(updatedStudent);
+        when(studentRepo.findById(student.getId())).thenReturn(Optional.of(updatedStudent));
+        when(studentRepo.save(updatedStudent)).thenReturn(updatedStudent);
+        when(studentMapper.toDto(updatedStudent)).thenReturn(expectedStudentDto);
 
-        Optional<StudentDto> updatedStudentDto = Optional.ofNullable(studentService.updateStudent(student.getId(), studentDto));
+        StudentDto updatedStudentDto = studentService.updateStudent(student.getId(), studentDto);
 
-        assertTrue(updatedStudentDto.isPresent());
-        assertEquals(expectedStudentDto.getEmail(), updatedStudentDto.get().getEmail());
+        assertNotNull(updatedStudentDto);
+        assertEquals(expectedStudentDto.getEmail(), updatedStudentDto.getEmail());
         verify(studentRepo, times(1)).findById(student.getId());
-        verify(studentRepo, times(1)).save(any(Student.class));
+        verify(studentRepo, times(1)).save(updatedStudent);
+        verify(studentMapper, times(1)).toDto(updatedStudent);
     }
 
     @Test
     void deleteById() throws StudentNotFoundException {
-        when(studentRepo.findById(any(Long.class))).thenReturn(Optional.of(student));
-        doNothing().when(studentRepo).deleteById(any(Long.class));
+        when(studentRepo.findById(student.getId())).thenReturn(Optional.of(student));
+        doNothing().when(studentRepo).deleteById(student.getId());
 
         studentService.deleteStudent(student.getId());
 

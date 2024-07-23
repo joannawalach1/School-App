@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -80,26 +79,45 @@ class ExamServiceTest {
     }
 
     @Test
-    void shouldSaveExamSuccessfully() throws Exception {
+    void simpleMockTest() {
+        System.out.println("Starting simpleMockTest...");
+
         // given
         when(examMapper.toEntity(examDto)).thenReturn(exam);
-        when(subjectRepo.findById(examDto.getSubjectId())).thenReturn(Optional.of(subject));
-        when(studentRepo.findById(examDto.getStudentId())).thenReturn(Optional.of(student));
-        when(examRepo.save(exam)).thenReturn(exam);
-        when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
 
         // when
-        ExamDto savedExamDto = examService.save(examDto);
+        Exam examEntity = examMapper.toEntity(examDto);
 
         // then
-        assertNotNull(savedExamDto);
-        assertEquals(expectedExamDto.getNameOfExam(), savedExamDto.getNameOfExam());
-        verify(examMapper, times(1)).toEntity(examDto);
-        verify(subjectRepo, times(1)).findById(examDto.getSubjectId());
-        verify(studentRepo, times(1)).findById(examDto.getStudentId());
-        verify(examRepo, times(1)).save(exam);
-        verify(examMapper, times(1)).toDto(exam);
+        assertNotNull(examEntity);
+        assertEquals(exam.getNameOfExam(), examEntity.getNameOfExam());
+        examMapper.toEntity(examDto);
+
+        System.out.println("simpleMockTest completed.");
     }
+
+    @Test
+    void shouldSaveExamSuccessfully() throws Exception {
+            // given
+            when(examMapper.toEntity(examDto)).thenReturn(exam);
+            when(subjectRepo.findById(examDto.getSubjectId())).thenReturn(Optional.of(subject));
+            when(studentRepo.findById(examDto.getStudentId())).thenReturn(Optional.of(student));
+            when(examRepo.save(exam)).thenReturn(exam);
+            when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
+
+            // when
+            ExamDto savedExamDto = examService.save(examDto);
+
+            // then
+            assertNotNull(savedExamDto);
+            assertEquals(expectedExamDto.getNameOfExam(), savedExamDto.getNameOfExam());
+            verify(examMapper, times(1)).toEntity(examDto);
+            verify(subjectRepo, times(1)).findById(examDto.getSubjectId());
+            verify(studentRepo, times(1)).findById(examDto.getStudentId());
+            verify(examRepo, times(1)).save(exam);
+            verify(examMapper, times(1)).toDto(exam);
+        }
+
 
     @Test
     void shouldFindExamById() {
@@ -173,7 +191,6 @@ class ExamServiceTest {
     void shouldUpdateExamSuccessfully() {
         // given
         when(examRepo.findById(exam.getId())).thenReturn(Optional.of(exam));
-        when(examMapper.toEntity(examDto)).thenReturn(exam);
         when(examRepo.save(exam)).thenReturn(exam);
         when(examMapper.toDto(exam)).thenReturn(expectedExamDto);
 
