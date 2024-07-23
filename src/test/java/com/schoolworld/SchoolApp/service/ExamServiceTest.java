@@ -64,7 +64,7 @@ class ExamServiceTest {
         exam.setDateOfExam(examDto.getDateOfExam());
 
         subject = new Subject();
-        subject.setId(1L); // Poprawiono ID, aby pasowało do testów
+        subject.setId(1L);
         subject.setName("Math");
 
         student = new Student();

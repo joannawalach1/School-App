@@ -27,7 +27,4 @@ public class Subject {
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
-
-    public Subject(Long subjectId) {
-    }
 }

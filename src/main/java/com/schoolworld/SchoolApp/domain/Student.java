@@ -28,10 +28,9 @@ public class Student {
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
-    public Student(Long studentId) {
-    }
 
-    public Student(String name, String email
-    ) {
+    public Student(String name, String email) {
+        this.name = name;
+        this.email = email;
     }
 }
