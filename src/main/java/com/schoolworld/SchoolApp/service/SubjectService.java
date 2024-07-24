@@ -5,6 +5,7 @@ import com.schoolworld.SchoolApp.domain.dto.SubjectDto;
 import com.schoolworld.SchoolApp.exceptions.SubjectWithSuchNameExistsException;
 import com.schoolworld.SchoolApp.exceptions.SubjectsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.SubjectMapper;
+import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class SubjectService {
 
     private final SubjectRepo subjectRepo;
     private final SubjectMapper subjectMapper;
+    private final ExamRepo examRepo;
 
     public SubjectDto saveSubject(SubjectDto subjectDto) throws SubjectWithSuchNameExistsException {
         if (subjectRepo.findByName(subjectDto.getName()).isPresent()) {
@@ -37,9 +39,9 @@ public class SubjectService {
         return subjectMapper.toDto(foundSubject);
     }
 
-    public List<SubjectDto> findAllExams() throws SubjectsNotFoundException {
+    public List<SubjectDto> findAllSubjects() throws SubjectsNotFoundException {
         List<Subject> subjects = subjectRepo.findAll();
-        if (subjects.isEmpty()){
+        if (subjects.isEmpty()) {
             throw new SubjectsNotFoundException("No subjects in database");
         }
         return subjectRepo.findAll().stream()
@@ -50,8 +52,15 @@ public class SubjectService {
     public void deleteSubject(Long id) {
         Subject subjectToDelete = subjectRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Subject with id: " + id + " not found"));
-        subjectRepo.deleteById(subjectToDelete.getId());
-    }
+        Subject defaultSubject = subjectRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Default subject not found"));
+        subjectToDelete.getExams().forEach(exam -> {
+                exam.setSubject(defaultSubject);
+                examRepo.save(exam);
+
+    });
+        subjectRepo.deleteById(subjectToDelete.getId());;
+}
 
     public SubjectDto updateSubject(Long id, SubjectDto subjectDto) {
         Subject existingSubject = subjectRepo.findById(id)

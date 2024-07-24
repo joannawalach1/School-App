@@ -19,7 +19,7 @@ public class StudentMapper {
             return null;
         }
 
-        Student student = new Student();
+        Student student = new Student("Jan", "jan@op.pl");
         student.setName(studentRequestDto.getName());
         student.setEmail(studentRequestDto.getEmail());
 

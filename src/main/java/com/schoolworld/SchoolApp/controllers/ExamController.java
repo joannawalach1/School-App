@@ -1,9 +1,9 @@
 package com.schoolworld.SchoolApp.controllers;
 
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
-import com.schoolworld.SchoolApp.exceptions.ExamNotFoundException;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import com.schoolworld.SchoolApp.service.ExamService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,19 +27,19 @@ public class ExamController {
         return ResponseEntity.status(HttpStatus.OK).body(createdExam);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/find/{id}")
     public ResponseEntity<Optional<ExamDto>> findById(@PathVariable Long id) {
         Optional<ExamDto> examDto = Optional.ofNullable(examService.findById(id));
         return  ResponseEntity.status(HttpStatus.OK).body(examDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/put/{id}")
     public ResponseEntity<Optional<ExamDto>> updateExam(@PathVariable Long id, @RequestBody ExamDto examDto) {
         Optional<ExamDto> updatedExam = Optional.ofNullable(examService.updateExam(id, examDto));
         return ResponseEntity.status(HttpStatus.OK).body(updatedExam);
     }
-
-    @DeleteMapping("/{id}")
+@Transactional
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         examService.deleteExam(id);
         return ResponseEntity.noContent().build();

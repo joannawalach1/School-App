@@ -21,10 +21,14 @@ public class Subject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-    private List<Exam> exams;
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Exam> exams = new ArrayList<>();
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    public Subject(String name) {
+        this.name = name;
+    }
 }

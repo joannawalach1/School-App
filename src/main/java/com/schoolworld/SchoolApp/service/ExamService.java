@@ -29,6 +29,9 @@ public class ExamService {
     private final SubjectRepo subjectRepo;
 @Transactional
     public ExamDto save(ExamDto examDto) throws Exception {
+    if (examDto == null) {
+        throw new IllegalArgumentException("ExamDto must not be null");
+    }
    Optional<Exam> foundExam = examRepo.findByNameOfExam(examDto.getNameOfExam());
    if (foundExam.isPresent()) {
        throw new ExamWithSuchNameExistsException("Exam with such name: " + examDto.getNameOfExam() + "exists");
@@ -70,22 +73,23 @@ public class ExamService {
                 .collect(Collectors.toList());
     }
     public void deleteExam(Long id) {
-        Exam examToDelete = examRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
+            Exam examToDelete = examRepo.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
 
-        Student student = examToDelete.getStudent();
-        if (student != null) {
-            student.getExams().remove(examToDelete);
-        }
-        studentRepo.save(student);
+            Student student = examToDelete.getStudent();
+            if (student != null) {
+                student.getExams().remove(examToDelete);
+                studentRepo.save(student);
+            }
 
-        Subject subject = examToDelete.getSubject();
-        if (subject != null) {
-            subject.getExams().remove(examToDelete);
+            Subject subject = examToDelete.getSubject();
+            if (subject != null) {
+                subject.getExams().remove(examToDelete);
+                subjectRepo.save(subject);
+            }
+
+            examRepo.deleteById(examToDelete.getId());
         }
-        subjectRepo.save(subject);
-        examRepo.deleteById(examToDelete.getId());
-    }
 
     public ExamDto updateExam(Long id, ExamDto examDto) {
         Exam examToUpdate = examRepo.findById(id)

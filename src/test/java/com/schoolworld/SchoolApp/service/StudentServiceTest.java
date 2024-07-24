@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +53,7 @@ class StudentServiceTest {
         studentRequestDto.setName("Adrian");
         studentRequestDto.setEmail("adrian@op.pl");
 
-        student = new Student();
+        student = new Student("Jan", "jan@op.pl");
         student.setId(1L);
         student.setName(studentRequestDto.getName());
         student.setEmail(studentRequestDto.getEmail());
@@ -63,7 +62,7 @@ class StudentServiceTest {
         studentDto.setName(student.getName());
         studentDto.setEmail(student.getEmail());
 
-        updatedStudent = new Student();
+        updatedStudent = new Student("Jan", "jan@op.pl");
         updatedStudent.setId(1L);
         updatedStudent.setName("Adrian");
         updatedStudent.setEmail("adrian@op.pl");

@@ -3,8 +3,12 @@ package com.schoolworld.SchoolApp.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.schoolworld.SchoolApp.config.IntegrationTestConfig;
+import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
+import com.schoolworld.SchoolApp.domain.Subject;
+import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
+import com.schoolworld.SchoolApp.repository.SubjectRepo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,67 +19,75 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @SpringBootTest
 @AutoConfigureMockMvc
-class StudentControllerTest extends IntegrationTestConfig {
+class ExamControllerTest extends IntegrationTestConfig {
 
+    @Autowired
+    private ExamRepo examRepo;
     @Autowired
     private StudentRepo studentRepo;
     @Autowired
+    private SubjectRepo subjectRepo;
+    @Autowired
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
+    private Student student;
+    private Subject subject;
+    private Exam exam;
 
     @BeforeEach
     void setUp1() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-
-        Student student1 = new Student("Jan", "jan@op.pl");
-        Student student2 = new Student("Anna", "anna@op.pl");
-
-        studentRepo.save(student1);
-        studentRepo.save(student2);
+        student = new Student("Jan", "jan@op.pl");
+        subject = new Subject("WOS");
+        exam = new Exam("Egamin z matematyki", LocalDateTime.now(), student, subject);
+        studentRepo.save(student);
+        subjectRepo.save(subject);
+        examRepo.save(exam);
     }
 
     @AfterEach
     void tearDown() {
         studentRepo.deleteAll();
+        subjectRepo.deleteAll();
+        examRepo.deleteAll();
     }
 
     @Test
-    void getByEmail() throws Exception {
-        String studentEmail = "jan@op.pl";
-        mockMvc.perform(MockMvcRequestBuilders.get("/student/findByEmail/{email}", studentEmail))
+    void getById() throws Exception {
+        Exam newExam = new Exam("Egzamin z biologii", LocalDateTime.now(), student, subject);
+        examRepo.save(newExam);
+        mockMvc.perform(MockMvcRequestBuilders.get("/exam/find/{id}", newExam.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Jan"))
-                .andExpect(jsonPath("$.email").value("jan@op.pl"))
+                .andExpect(jsonPath("$.nameOfExam").value("Egzamin z biologii"))
                 .andReturn();
     }
-
+//TODO not working
     @Test
     void create() throws Exception {
-        Student newStudent = new Student("Ewa", "ewa@op.pl");
-        String studentJson = objectMapper.writeValueAsString(newStudent);
+        Exam newExam = new Exam("Egzamin maturalny 1", LocalDateTime.now(), student, subject);
+        String examJson = objectMapper.writeValueAsString(newExam);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/student")
+        mockMvc.perform(MockMvcRequestBuilders.post("/exam")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(studentJson))
+                        .content(examJson))
                 .andDo(print())
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nameOfExam").value("Egzamin maturalny 1"))
                 .andReturn();
     }
 
     @Test
     void delete() throws Exception {
-        Student student = new Student("Marek", "marek@op.pl");
-        studentRepo.save(student);
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/student/delete/{id}", student.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/exam/delete/{id}", exam.getId()))
                 .andDo(print())
                 .andExpect(status().isNoContent())
                 .andReturn();
@@ -83,20 +95,17 @@ class StudentControllerTest extends IntegrationTestConfig {
 
     @Test
     void update() throws Exception {
-        Student student = new Student("Kasia", "kasia@op.pl");
-        studentRepo.save(student);
+        Exam updatedExam = new Exam("Egzamin z chemii", LocalDateTime.now(), student, subject);
+        examRepo.save(updatedExam);
+        String updatedExamJson = objectMapper.writeValueAsString(updatedExam);
 
-        Student updatedStudent = new Student("Katarzyna", "katarzyna@op.pl");
-        String updatedStudentJson = objectMapper.writeValueAsString(updatedStudent);
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/student/update/{studentId}", student.getId())
+        mockMvc.perform(MockMvcRequestBuilders.put("/exam/put/{id}", updatedExam.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedStudentJson))
+                        .content(updatedExamJson))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Katarzyna"))
-                .andExpect(jsonPath("$.email").value("katarzyna@op.pl"))
+                .andExpect(jsonPath("$.nameOfExam").value("Egzamin z chemii"))
                 .andReturn();
     }
 }

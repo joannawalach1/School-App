@@ -67,7 +67,7 @@ class ExamServiceTest {
         subject.setId(1L);
         subject.setName("Math");
 
-        student = new Student();
+        student = new Student("Jan", "jan@op.pl");
         student.setId(1L);
         student.setName("Wojtek");
         student.setEmail("wojtek12@op.pl");

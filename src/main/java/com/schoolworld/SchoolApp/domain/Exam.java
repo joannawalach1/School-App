@@ -21,14 +21,20 @@ public class Exam{
     private String nameOfExam;
     private LocalDateTime dateOfExam;
     @ManyToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
-
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    public Exam(String nameOfExam, LocalDateTime dateOfExam, Student student, Subject subject) {
+        this.nameOfExam = nameOfExam;
+        this.dateOfExam = dateOfExam;
+        this.student = student;
+        this.subject = subject;
+    }
 }
