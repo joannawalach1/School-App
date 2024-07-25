@@ -115,7 +115,7 @@ class SubjectServiceTest {
         subjectService.deleteSubject(subject.getId());
 
         // then
-        verify(subjectRepo, times(1)).findById(subject.getId());
+        verify(subjectRepo, times(2)).findById(subject.getId());
         verify(subjectRepo, times(1)).deleteById(subject.getId());
     }
 }

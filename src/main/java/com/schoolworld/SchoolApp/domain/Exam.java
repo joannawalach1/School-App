@@ -21,10 +21,10 @@ public class Exam{
     private String nameOfExam;
     private LocalDateTime dateOfExam;
     @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "student_id", nullable = true)
     private Student student;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "subject_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "subject_id", nullable = true)
     private Subject subject;
     @CreationTimestamp
     private LocalDateTime created;

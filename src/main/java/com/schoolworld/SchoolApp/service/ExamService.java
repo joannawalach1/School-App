@@ -1,10 +1,10 @@
 package com.schoolworld.SchoolApp.service;
 
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.Subject;
 import com.schoolworld.SchoolApp.domain.dto.ExamDto;
-import com.schoolworld.SchoolApp.exceptions.ExamWithSuchNameExistsException;
 import com.schoolworld.SchoolApp.exceptions.ExamsNotFoundException;
 import com.schoolworld.SchoolApp.mappers.ExamMapper;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,34 +26,19 @@ public class ExamService {
     private final ExamMapper examMapper;
     private final StudentRepo studentRepo;
     private final SubjectRepo subjectRepo;
-@Transactional
+
+    @Transactional
     public ExamDto save(ExamDto examDto) throws Exception {
-    if (examDto == null) {
-        throw new IllegalArgumentException("ExamDto must not be null");
+        Exam entity = examMapper.toEntity(examDto);
+        Student student = studentRepo.findById(examDto.getStudentId()).orElseThrow(() -> new NotFoundException("Student with id: " + examDto.getStudentId() + "doesn't exist"));
+        Subject subject = subjectRepo.findById(examDto.getSubjectId()).orElseThrow(()-> new NotFoundException("Subject with id: " + examDto.getSubjectId() + "doesn't exist"));
+        entity.setNameOfExam(examDto.getNameOfExam());
+        entity.setDateOfExam(examDto.getDateOfExam());
+        entity.setStudent(student);
+        entity.setSubject(subject);
+        Exam savedExam = examRepo.save(entity);
+        return examMapper.toDto(savedExam);
     }
-   Optional<Exam> foundExam = examRepo.findByNameOfExam(examDto.getNameOfExam());
-   if (foundExam.isPresent()) {
-       throw new ExamWithSuchNameExistsException("Exam with such name: " + examDto.getNameOfExam() + "exists");
-   }
-    Optional<Student> optionalStudent = examDto.getStudentId() != null ?
-            studentRepo.findById(examDto.getStudentId()) :
-            Optional.empty();
-
-    Optional<Subject> optionalSubject = subjectRepo.findById(examDto.getSubjectId());
-
-    if (optionalSubject.isEmpty()) {
-        throw new RuntimeException("Subject not found");
-    }
-
-    Subject subject = optionalSubject.get();
-    Student student = optionalStudent.orElse(null);
-
-    Exam exam = examMapper.toEntity(examDto);
-    exam.setSubject(subject);
-    exam.setStudent(student);
-    Exam savedExam = examRepo.save(exam);
-    return examMapper.toDto(savedExam);
-        }
 
 
     public ExamDto findById(Long id) {
@@ -72,24 +56,25 @@ public class ExamService {
                 .map(examMapper::toDto)
                 .collect(Collectors.toList());
     }
+
     public void deleteExam(Long id) {
-            Exam examToDelete = examRepo.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
+        Exam examToDelete = examRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Exam with id: " + id + " not found"));
 
-            Student student = examToDelete.getStudent();
-            if (student != null) {
-                student.getExams().remove(examToDelete);
-                studentRepo.save(student);
-            }
-
-            Subject subject = examToDelete.getSubject();
-            if (subject != null) {
-                subject.getExams().remove(examToDelete);
-                subjectRepo.save(subject);
-            }
-
-            examRepo.deleteById(examToDelete.getId());
+        Student student = examToDelete.getStudent();
+        if (student != null) {
+            student.getExams().remove(examToDelete);
+            studentRepo.save(student);
         }
+
+        Subject subject = examToDelete.getSubject();
+        if (subject != null) {
+            subject.getExams().remove(examToDelete);
+            subjectRepo.save(subject);
+        }
+
+        examRepo.deleteById(examToDelete.getId());
+    }
 
     public ExamDto updateExam(Long id, ExamDto examDto) {
         Exam examToUpdate = examRepo.findById(id)

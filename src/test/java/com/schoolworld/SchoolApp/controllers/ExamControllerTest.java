@@ -6,6 +6,7 @@ import com.schoolworld.SchoolApp.config.IntegrationTestConfig;
 import com.schoolworld.SchoolApp.domain.Exam;
 import com.schoolworld.SchoolApp.domain.Student;
 import com.schoolworld.SchoolApp.domain.Subject;
+import com.schoolworld.SchoolApp.domain.dto.ExamDto;
 import com.schoolworld.SchoolApp.repository.ExamRepo;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
 import com.schoolworld.SchoolApp.repository.SubjectRepo;
@@ -39,17 +40,25 @@ class ExamControllerTest extends IntegrationTestConfig {
     private Student student;
     private Subject subject;
     private Exam exam;
+    private ExamDto examDto;
 
     @BeforeEach
     void setUp1() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        student = new Student("Jan", "jan@op.pl");
-        subject = new Subject("WOS");
-        exam = new Exam("Egamin z matematyki", LocalDateTime.now(), student, subject);
-        studentRepo.save(student);
-        subjectRepo.save(subject);
-        examRepo.save(exam);
+        student = new Student();
+        student.setName("John");
+        student = studentRepo.save(student);
+
+        subject = new Subject();
+        subject.setName("Mathematics");
+        subject = subjectRepo.save(subject);
+
+        examDto = new ExamDto();
+        examDto.setStudentId(student.getId());
+        examDto.setSubjectId(subject.getId());
+        examDto.setNameOfExam("Algebra Exam");
+        examDto.setDateOfExam(LocalDateTime.now());
     }
 
     @AfterEach
@@ -70,24 +79,24 @@ class ExamControllerTest extends IntegrationTestConfig {
                 .andExpect(jsonPath("$.nameOfExam").value("Egzamin z biologii"))
                 .andReturn();
     }
-//TODO not working
+
     @Test
     void create() throws Exception {
-        Exam newExam = new Exam("Egzamin maturalny 1", LocalDateTime.now(), student, subject);
-        String examJson = objectMapper.writeValueAsString(newExam);
-
+        String examDtoJson = objectMapper.writeValueAsString(examDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/exam")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(examJson))
+                .content(examDtoJson))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nameOfExam").value("Egzamin maturalny 1"))
+                .andExpect(jsonPath("$.nameOfExam").value("Algebra Exam"))
                 .andReturn();
     }
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/exam/delete/{id}", exam.getId()))
+        Exam updatedExam = new Exam("Egzamin z chemii", LocalDateTime.now(), student, subject);
+        examRepo.save(updatedExam);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/exam/delete/{id}", updatedExam.getId()))
                 .andDo(print())
                 .andExpect(status().isNoContent())
                 .andReturn();

@@ -39,7 +39,7 @@ import java.util.Optional;
             return  ResponseEntity.status(HttpStatus.OK).body(subjects);
         }
 
-        @PutMapping("/put/{id}")
+        @PutMapping("/update/{id}")
         public ResponseEntity<Optional<SubjectDto>> updateSubject(@PathVariable Long id, @RequestBody SubjectDto subjectDto) {
             Optional<SubjectDto> updatedSubject = Optional.ofNullable(subjectService.updateSubject(id, subjectDto));
             return ResponseEntity.status(HttpStatus.OK).body(updatedSubject);
