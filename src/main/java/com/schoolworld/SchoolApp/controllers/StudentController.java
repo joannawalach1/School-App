@@ -31,14 +31,14 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
     }
 
-    @GetMapping(value = "/findById/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/findById/{id}")
     public ResponseEntity<StudentDto> findById(@PathVariable Long id) {
         Optional<StudentDto> foundStudentDto = studentService.findById(id);
 
         return foundStudentDto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/findByEmail/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/findByEmail/{email}")
     public ResponseEntity<StudentDto> findByEmail(@PathVariable String email) {
         Optional<StudentDto> foundStudentDto = studentService.findByEmail(email);
 
@@ -46,20 +46,20 @@ public class StudentController {
     }
 
 
-    @GetMapping(value = "/students", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/students")
     public ResponseEntity<List<StudentDto>> findAll() throws StudentsNotFoundException {
         List<StudentDto> allStudents = studentService.getStudentsWithExams();
         return ResponseEntity.status(HttpStatus.OK).body(allStudents);
     }
 
-    @PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/update/{id}")
     public ResponseEntity<StudentDto> updateStudent(@PathVariable Long id, @RequestBody StudentDto studentDto) {
         Optional<StudentDto> updatedStudent = Optional.ofNullable(studentService.updateStudent(id, studentDto));
         return updatedStudent.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();}

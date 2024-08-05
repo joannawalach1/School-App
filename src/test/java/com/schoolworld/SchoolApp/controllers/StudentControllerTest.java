@@ -1,9 +1,10 @@
 package com.schoolworld.SchoolApp.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.schoolworld.SchoolApp.config.IntegrationTestConfig;
 import com.schoolworld.SchoolApp.domain.Student;
+import com.schoolworld.SchoolApp.domain.dto.StudentDto;
 import com.schoolworld.SchoolApp.repository.StudentRepo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,10 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,15 +29,16 @@ class StudentControllerTest extends IntegrationTestConfig {
     private StudentRepo studentRepo;
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
+    private Student student1;
+    private Student student2;
 
     @BeforeEach
-    void setUp1() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        Student student1 = new Student("Jan", "jan@op.pl");
-        Student student2 = new Student("Anna", "anna@op.pl");
+    void setUp() {
+        student1 = new Student("Jan", "jan@op.pl");
+        student2 = new Student("Anna", "anna@op.pl");
 
         studentRepo.save(student1);
         studentRepo.save(student2);
@@ -49,7 +50,7 @@ class StudentControllerTest extends IntegrationTestConfig {
     }
 
     @Test
-    void getByEmail() throws Exception {
+    void shouldFindStudentByEmail() throws Exception {
         String studentEmail = "jan@op.pl";
         mockMvc.perform(MockMvcRequestBuilders.get("/student/findByEmail/{email}", studentEmail))
                 .andDo(print())
@@ -61,8 +62,12 @@ class StudentControllerTest extends IntegrationTestConfig {
     }
 
     @Test
-    void create() throws Exception {
-        Student newStudent = new Student("Ewa", "ewa@op.pl");
+    void shouldCreateStudent() throws Exception {
+        StudentDto newStudent = new StudentDto();
+        newStudent.setName("Ewa");
+        newStudent.setEmail("ewa@op.pl");
+        newStudent.setExams(new ArrayList<>());
+
         String studentJson = objectMapper.writeValueAsString(newStudent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/student")
@@ -70,29 +75,31 @@ class StudentControllerTest extends IntegrationTestConfig {
                         .content(studentJson))
                 .andDo(print())
                 .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value("Ewa"))
+                .andExpect(jsonPath("$.email").value("ewa@op.pl"))
+                .andExpect(jsonPath("$.exams").isArray())
                 .andReturn();
     }
 
-    @Test
-    void delete() throws Exception {
-        Student student = new Student("Marek", "marek@op.pl");
-        studentRepo.save(student);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/student/delete/{id}", student.getId()))
+    @Test
+    void shouldDeleteStudent() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/student/delete/{id}", student2.getId()))
                 .andDo(print())
                 .andExpect(status().isNoContent())
                 .andReturn();
     }
 
     @Test
-    void update() throws Exception {
+    void shouldUpdateStudent() throws Exception {
         Student student = new Student("Kasia", "kasia@op.pl");
         studentRepo.save(student);
 
         Student updatedStudent = new Student("Katarzyna", "katarzyna@op.pl");
         String updatedStudentJson = objectMapper.writeValueAsString(updatedStudent);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/student/update/{studentId}", student.getId())
+        mockMvc.perform(MockMvcRequestBuilders.put("/student/update/{studentId}", student1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedStudentJson))
                 .andDo(print())

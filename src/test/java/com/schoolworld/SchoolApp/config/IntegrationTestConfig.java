@@ -16,9 +16,6 @@ public class IntegrationTestConfig {
     @Autowired
     public MockMvc mockMvc;
 
-    @Autowired
-    public ObjectMapper objectMapper;
-
     static {
         PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
                 .withDatabaseName("school1")
